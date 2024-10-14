@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Slew Mode
-// @version      0.2
+// @version      0.3
 // @description  Slew mode from FSX
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -32,6 +32,7 @@
     var slewAlt = 0;
     var headingRad = 0; //Used to make forward the aircraft's heading, not true north.
     window.lastCam = 0;
+    window.lastGravity = [0,0,0];
     window.slewDiv = document.createElement('div');
     window.slewDiv.style.width = 'fit-content';
     window.slewDiv.style.height = 'fit-content';
@@ -40,6 +41,17 @@
     window.slewDiv.style.margin = '5px';
     document.body.appendChild(window.slewDiv);
 
+    let lastFrameNumber = geofs.frameNumber;
+
+    function checkFrameNumber() {
+        if (!isSlewing) return;
+
+        if (geofs.frameNumber !== lastFrameNumber) {
+            lastFrameNumber = geofs.frameNumber;
+            updateSlew();
+        }
+        requestAnimationFrame(checkFrameNumber);
+    }
 
     document.addEventListener('keydown', function(event) {
             if (event.key == shortcuts.enableSlew) {
@@ -47,11 +59,11 @@
                 if (isSlewing) {
                     window.slew();
                 } else {
-                    geofs.camera.set(window.lastCam)
+                    geofs.camera.set(window.lastCam);
                     speedF = 0;
                     sideways = 0;
                     speedV = 0;
-                    clearInterval(window.slewInterval);
+                    geofs.aircraft.instance.rigidBody.gravityForce = window.lastGravity;
                     window.slewDiv.innerHTML = ``;
                     if (!geofs.animation.values.groundContact) {
                         var c = geofs.aircraft.instance;
@@ -90,20 +102,27 @@
         geofs.aircraft.instance.llaLocation = [slewA, slewB, slewAlt];
         geofs.aircraft.instance.object3d.setInitialRotation([0,0,headingRad]);
         geofs.aircraft.instance.rigidBody.v_linearVelocity = [0,0,0];
+        geofs.aircraft.instance.rigidBody.v_acceleration = [0,0,0];
         geofs.aircraft.instance.rigidBody.v_angularVelocity = [0,0,0];
+        geofs.aircraft.instance.rigidBody.v_angularAcceleration = [0,0,0];
+        geofs.aircraft.instance.rigidBody.gravityForce = [0,0,0];
         window.slewDiv.innerHTML = `
         <p style="margin: 0px; font-weight: bold;">LAT: ${slewA.toFixed(4)} LON: ${slewB.toFixed(4)} ALT: ${slewAlt.toFixed(1)} FT MSL MAG ${(headingRad*RAD_TO_DEGREES).toFixed(0)} ${((Math.abs(speedF) + Math.abs(sideways))/0.0001).toFixed(0)} UNITS</p>
         `;
     }
 
     window.slew = async function() {
+        speedF = 0;
+        sideways = 0;
+        speedV = 0;
+        window.lastGravity = geofs.aircraft.instance.rigidBody.gravityForce;
         window.lastCam = geofs.camera.currentMode;
         headingRad = geofs.animation.values.heading360 * DEGREES_TO_RAD;
         window.pControl = geofs.preferences.controlMode;
         slewA = geofs.aircraft.instance.llaLocation[0];
         slewB = geofs.aircraft.instance.llaLocation[1];
         slewAlt = geofs.aircraft.instance.llaLocation[2];
-        window.slewInterval = setInterval(updateSlew, 10);
         geofs.camera.set(5);
+        requestAnimationFrame(checkFrameNumber);
     };
 })();
