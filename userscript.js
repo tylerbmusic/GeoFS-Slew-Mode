@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Slew Mode
-// @version      0.3
+// @version      0.4
 // @description  Slew mode from FSX
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -18,12 +18,20 @@
         slewBackward: "k", //Increase slew backward speed/derease slew forward speed
         slewRight: "l", //Increase slew right speed/decrease slew left speed
         slewUp: "u", //Increase slew up speed/decrease slew down speed
-        slewHR: ".", //Heading Right (turns your plane right 5 degrees)
-        slewHL: ",", //Heading Left (turns your plane left 5 degrees)
+        slewHR: ".", //Heading Right (turns your plane right 2 degrees)
+        slewHL: ",", //Heading Left (turns your plane left 2 degrees)
+        rotation: {
+            up: "ArrowUp", //Rotate up 2 degrees
+            down: "ArrowDown", //Rotate down 2 degrees
+            left: "ArrowLeft", //Rotate left 2 degrees
+            right: "ArrowRight" //Rotate right 2 degrees
+        },
         slewDown: "Enter" //Increase slew down speed/decrease slew up speed
     };
 
     var isSlewing = false;
+    var tilt = 0;
+    var roll = 0;
     var speedF = 0; //forward/backward
     var sideways = 0; //left/right
     var speedV = 0; //up/down
@@ -63,6 +71,8 @@
                     speedF = 0;
                     sideways = 0;
                     speedV = 0;
+                    tilt = 0;
+                    roll = 0;
                     geofs.aircraft.instance.rigidBody.gravityForce = window.lastGravity;
                     window.slewDiv.innerHTML = ``;
                     if (!geofs.animation.values.groundContact) {
@@ -84,9 +94,17 @@
             } else if (event.key == shortcuts.slewDown) {
                 speedV -= 2;
             } else if (event.key == shortcuts.slewHR) {
-                headingRad += (5*DEGREES_TO_RAD);
+                headingRad += (2*DEGREES_TO_RAD);
             } else if (event.key == shortcuts.slewHL) {
-                headingRad -= (5*DEGREES_TO_RAD);
+                headingRad -= (2*DEGREES_TO_RAD);
+            } else if (event.key == shortcuts.rotation.up) {
+                tilt += (2*DEGREES_TO_RAD);
+            } else if (event.key == shortcuts.rotation.down) {
+                tilt -= (2*DEGREES_TO_RAD);
+            } else if (event.key == shortcuts.rotation.left) {
+                roll += (2*DEGREES_TO_RAD);
+            } else if (event.key == shortcuts.rotation.right) {
+                roll -= (2*DEGREES_TO_RAD);
             }
         });
 
@@ -100,7 +118,7 @@
         slewB += deltaY;
         slewAlt = (geofs.animation.values.groundContact && speedV < 0) ? slewAlt : slewAlt + speedV; //I'm pretty confident this will work (but it's giving me the most problems :\)
         geofs.aircraft.instance.llaLocation = [slewA, slewB, slewAlt];
-        geofs.aircraft.instance.object3d.setInitialRotation([0,0,headingRad]);
+        geofs.aircraft.instance.object3d.setInitialRotation([tilt,roll,headingRad]);
         geofs.aircraft.instance.rigidBody.v_linearVelocity = [0,0,0];
         geofs.aircraft.instance.rigidBody.v_acceleration = [0,0,0];
         geofs.aircraft.instance.rigidBody.v_angularVelocity = [0,0,0];
@@ -115,6 +133,8 @@
         speedF = 0;
         sideways = 0;
         speedV = 0;
+        tilt = 0;
+        roll = 0;
         window.lastGravity = geofs.aircraft.instance.rigidBody.gravityForce;
         window.lastCam = geofs.camera.currentMode;
         headingRad = geofs.animation.values.heading360 * DEGREES_TO_RAD;
