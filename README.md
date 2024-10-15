@@ -12,5 +12,7 @@ To toggle slew mode, press 'Y'.
 The forward/backward, left/right, and up/down movement is speed-based, which means to go forward, instead of holding 'I', press 'I'. To speed up, press 'I'. To slow down, and eventually go backward, press 'K'.  
 'J' is left, 'L' is right.  
 Up/Down movement controls are 'U' and 'Enter' respectively.  
-To rotate 5 degrees to your right, press '.' (period); To rotate 5 degrees to your left, press ',' (comma).  
-When slew mode is activated, red bold text will appear at the top left of your screen, similar to the slew mode of Microsoft Flight Simulator X.
+To rotate 2 degrees to your right, press '.' (period); To rotate 2 degrees to your left, press ',' (comma). To rotate 2 degrees up, press the up arrow. To rotate 2 degrees down, press the down arrow. To roll 2 degrees right, press the right arrow. To roll 2 degrees left, press the left arrow.  
+When slew mode is activated, red bold text will appear at the top left of your screen, similar to the slew mode of Microsoft Flight Simulator X.  
+  
+If you find any issues, submit an issue at https://github.com/tylerbmusic/GeoFS-Slew-Mode/issues
