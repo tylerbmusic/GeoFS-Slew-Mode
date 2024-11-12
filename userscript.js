@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS Slew Mode
-// @version      0.4
+// @version      0.4.1
 // @description  Slew mode from FSX
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -62,6 +62,8 @@
     }
 
     document.addEventListener('keydown', function(event) {
+        const isChatFocused = (document.activeElement === document.getElementById("chatInput"));
+        if (!isChatFocused) {
             if (event.key == shortcuts.enableSlew) {
                 isSlewing = !isSlewing;
                 if (isSlewing) {
@@ -78,7 +80,7 @@
                     if (!geofs.animation.values.groundContact) {
                         var c = geofs.aircraft.instance;
                         var m = c.definition.minimumSpeed / 1.94 * c.definition.mass;
-                        c.rigidBody.applyCentralImpulse(V3.scale(c.object3d.getWorldFrame()[1], m));
+                        c.rigidBody.applyCentralImpulse(window.V3.scale(c.object3d.getWorldFrame()[1], m));
                     }
                 }
             } else if (event.key == shortcuts.slewForward) {
@@ -106,7 +108,8 @@
             } else if (event.key == shortcuts.rotation.right) {
                 roll -= (2*DEGREES_TO_RAD);
             }
-        });
+        }
+    });
 
     async function updateSlew() {
         //console.log([slewA, slewB, slewAlt]);
@@ -125,7 +128,7 @@
         geofs.aircraft.instance.rigidBody.v_angularAcceleration = [0,0,0];
         geofs.aircraft.instance.rigidBody.gravityForce = [0,0,0];
         window.slewDiv.innerHTML = `
-        <p style="margin: 0px; font-weight: bold;">LAT: ${slewA.toFixed(4)} LON: ${slewB.toFixed(4)} ALT: ${slewAlt.toFixed(1)} FT MSL MAG ${(headingRad*RAD_TO_DEGREES).toFixed(0)} ${((Math.abs(speedF) + Math.abs(sideways))/0.0001).toFixed(0)} UNITS</p>
+        <p style="margin: 0px; font-weight: bold;">LAT: ${slewA.toFixed(4)} LON: ${slewB.toFixed(4)} ALT: ${(slewAlt*window.METERS_TO_FEET).toFixed(1)} FT MSL MAG ${(headingRad*RAD_TO_DEGREES).toFixed(0)} ${((Math.abs(speedF) + Math.abs(sideways))/0.0001).toFixed(0)} UNITS</p>
         `;
     }
 
