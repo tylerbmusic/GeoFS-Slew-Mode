@@ -1,12 +1,15 @@
 // ==UserScript==
 // @name         GeoFS Slew Mode
-// @version      0.5
+// @namespace    https://github.com/tylerbmusic/GeoFS-Slew-Mode
+// @version      0.5.1
 // @description  Slew mode from FSX
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
 // @match        https://*.geo-fs.com/geofs.php*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=geo-fs.com
 // @grant        none
+// @downloadURL  https://github.com/tylerbmusic/GeoFS-Slew-Mode/raw/refs/heads/main/userscript.js
+// @updateURL    https://github.com/tylerbmusic/GeoFS-Slew-Mode/raw/refs/heads/main/userscript.js
 // ==/UserScript==
 
 (function() {
@@ -40,6 +43,7 @@
         slewMenu.addKBShortcut("Yaw Left: ", "RotRYLeft", 2, ',', function(){kb("YLeft")});
         slewMenu.addKBShortcut("Yaw Right: ", "RotYRight", 2, '.', function(){kb("YRight")});
     }
+    function scale (e,t){return[e[0]*t,e[1]*t,e[2]*t]}
     /*if (localStorage.getItem("slewEnabled") == null) { //Set defaults
         localStorage.setItem("slewEnabled", 'true');
         localStorage.setItem("slewLatSpeed", "0.0001");
@@ -61,7 +65,9 @@
         localStorage.setItem("slewRotYLeft", ",");
         localStorage.setItem("slewRotYRight", ".");
     }*/
-
+    window.DEGREES_TO_RAD = window.DEGREES_TO_RAD || 0.017453292519943295769236907684886127134428718885417254560971914401710091146034494436822415696345094822123044925073790592483854692275281012398474218934047117319168245015010769561697553581238605305168789;
+    window.RAD_TO_DEGREES = window.RAD_TO_DEGREES || 57.295779513082320876798154814105170332405472466564321549160243861202847148321552632440968995851110944186223381632864893281448264601248315036068267863411942122526388097467267926307988702893110767938261;
+    window.METERS_TO_FEET = window.METERS_TO_FEET || 3.280839895;
     var isSlewing = false;
     var tilt = 0;
     var roll = 0;
@@ -135,7 +141,7 @@
                         } else {
                             m = c.definition.minimumSpeed / Number(localStorage.getItem('slewSpeedMultiplierFlaps')) * c.definition.mass; // default 2.7
                         }
-                        c.rigidBody.applyCentralImpulse(window.V3.scale(c.object3d.getWorldFrame()[1], m));
+                        c.rigidBody.applyCentralImpulse(scale(c.object3d.getWorldFrame()[1], m));
                     }
                 }
             } else if (event == "Forward") {
