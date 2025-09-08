@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS Slew Mode
 // @namespace    https://github.com/tylerbmusic/GeoFS-Slew-Mode
-// @version      0.5.1
+// @version      0.5.2
 // @description  Slew mode from FSX
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -19,7 +19,7 @@
             .then(response => response.text())
             .then(script => {eval(script);})
             .then(() => {setTimeout(afterGMenu, 100);});
-    }
+    } else afterGMenu()
     function afterGMenu() {
         const slewMenu = new window.GMenu('Slew Mode', 'slew');
         slewMenu.addItem("Horizontal Speed (in degrees/frame): ", "LatSpeed", 'number', 0, '0.0001');
