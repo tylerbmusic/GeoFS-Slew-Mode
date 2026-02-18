@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS Slew Mode
 // @namespace    https://github.com/tylerbmusic/GeoFS-Slew-Mode
-// @version      0.6
+// @version      0.6.1
 // @description  Slew mode from FSX
 // @author       GGamerGGuy
 // @match        https://www.geo-fs.com/geofs.php?v=*
@@ -49,7 +49,7 @@
             let NAME = "Slew-Mode";
             let SPACEDNAME = "Slew Mode";
             let LSNAME = "slew";
-            let VERSION = "0.6";
+            let VERSION = "0.6.1";
             let URL = "https://github.com/tylerbmusic/GeoFS-Slew-Mode";
             let a = await fetch('https://tylerbmusic.github.io/versions.json?t=' + Date.now());
             let b = await a.text();
@@ -147,6 +147,7 @@
     function kb(event) { //kb = KeyBoard
         const isChatFocused = (document.activeElement === document.getElementById("chatInput"));
         if (!isChatFocused && (localStorage.getItem("slewEnabled") == 'true')) {
+            let blist = ["Forward", "Backwards", "Right", "Left", "Up", "Down"];
             if (event == "Toggle") {
                 isSlewing = !isSlewing;
                 if (isSlewing) {
@@ -171,7 +172,7 @@
                         c.rigidBody.applyCentralImpulse(scale(c.object3d.getWorldFrame()[1], m));
                     }
                 }
-            } else if (!window.slewEvents[event]) {
+            } else if ((!window.slewEvents[event]) || blist.indexOf(event) == -1 || localStorage.getItem("slewMsfs") == 'false') {
                 window.slewEvents[event] = true;
                 if (event == "Forward" && localStorage.getItem("slewMsfs") == 'false') {
                     speedF += Number(localStorage.getItem('slewLatSpeed')); // 0.0001 by default
@@ -240,14 +241,13 @@
             deltaY = (Math.sin(headingRad) * (speedF && altMult*speedF[0]*(Date.now()-speedF[1])/10000)) + (Math.cos(headingRad) * (sideways && altMult*sideways[0]*(Date.now()-sideways[1])/5000));
             slewAlt = (window.geofs.animation.values.groundContact && (!speedV || speedV[0] <= 0)) ? slewAlt : slewAlt + (speedV && altMult*speedV[0]*(Date.now()-speedV[1])/5000);
         } else {
-            deltaX = (Math.cos(headingRad) * (speedF && speedF[0]*(Date.now()-speedF[1])/10000)) - (Math.sin(headingRad) * (sideways && sideways[0]*(Date.now()-sideways[1])/5000));
-            deltaY = (Math.sin(headingRad) * (speedF && speedF[0]*(Date.now()-speedF[1])/10000)) + (Math.cos(headingRad) * (sideways && sideways[0]*(Date.now()-sideways[1])/5000));
+            deltaX = (Math.cos(headingRad) * speedF) - (Math.sin(headingRad) * sideways);
+            deltaY = (Math.sin(headingRad) * speedF) + (Math.cos(headingRad) * sideways);
             slewAlt = (window.geofs.animation.values.groundContact && speedV <= 0) ? slewAlt : slewAlt + speedV; //I'm pretty confident this will work (but it's giving me the most problems :\)
         }
         slewA += deltaX;
         slewB += deltaY;
         window.geofs.aircraft.instance.llaLocation = [slewA, slewB, slewAlt];
-        window.geofs.aircraft.instance.llaLocation[1] = slewB;
         window.geofs.aircraft.instance.object3d.setInitialRotation([tilt,roll,headingRad]);
         window.geofs.aircraft.instance.rigidBody.v_acceleration = [0,0,0];
         window.geofs.aircraft.instance.rigidBody.v_angularAcceleration = [0,0,0];
